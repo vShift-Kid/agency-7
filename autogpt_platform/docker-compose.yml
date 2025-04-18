@@ -1,3 +1,5 @@
+version: '3.8'
+
 networks:
   app-network:
     name: app-network
@@ -7,14 +9,12 @@ networks:
 volumes:
   supabase-config:
 
-x-agpt-services:
-  &agpt-services
+x-agpt-services: &agpt-services
   networks:
     - app-network
     - shared-network
 
-x-supabase-services:
-  &supabase-services
+x-supabase-services: &supabase-services
   networks:
     - app-network
     - shared-network
@@ -44,6 +44,16 @@ services:
     extends:
       file: ./docker-compose.platform.yml
       service: rest_server
+    depends_on:
+      - redis
+    environment:
+      # point at the Compose-managed Redis container
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      # if you have a Redis password, set it here; otherwise leave blank
+      REDIS_PASSWORD: "${REDIS_PASSWORD:-}"
+      # ensure your HTTP server binds to the correct port
+      PORT: "8000"
 
   executor:
     <<: *agpt-services
